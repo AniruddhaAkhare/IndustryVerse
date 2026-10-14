@@ -76,10 +76,62 @@ def _fill_sensor_defaults(sensors: Dict[str, float], machine_type: str) -> Dict[
     result.update(sensors)
     return result
 
+PLANT_FLEET_UNITS = [
+    {
+        "machine_id": "MCH-B001",
+        "machine_name": "Industrial Boiler B1",
+        "machine_type": "Industrial Boiler",
+        "log_text": "Steam pressure steady at 180 PSI. Burner ignition cycle verified. Flue gas temperature within nominal threshold at 195 C. Minor scale buildup on heat exchanger tubes.",
+        "sensor_data": {"temperature": 195.0, "vibration": 2.8, "pressure": 180.0, "rpm": 1200.0, "voltage": 415.0, "current": 48.0, "health_score": 66.0},
+        "health_score": 66.0,
+    },
+    {
+        "machine_id": "MCH-G001",
+        "machine_name": "Power Generator G1",
+        "machine_type": "Power Generator",
+        "log_text": "Auxiliary diesel power generator test run complete. Output voltage balanced across 3 phases at 400V. Alternator winding temperature normal. Fuel filter replaced.",
+        "sensor_data": {"temperature": 72.0, "vibration": 3.1, "pressure": 65.0, "rpm": 1500.0, "voltage": 400.0, "current": 140.0, "health_score": 81.0},
+        "health_score": 81.0,
+    },
+    {
+        "machine_id": "MCH-H001",
+        "machine_name": "Hydraulic Press HP1",
+        "machine_type": "Hydraulic Press",
+        "log_text": "Primary stamping press hydraulic pack inspection. Piston ram seals show no leakage. Hydraulic oil clean and at optimal viscosity. Cycle time 4.2 seconds.",
+        "sensor_data": {"temperature": 62.0, "vibration": 2.2, "pressure": 210.0, "rpm": 1450.0, "voltage": 400.0, "current": 32.0, "health_score": 91.0},
+        "health_score": 91.0,
+    },
+    {
+        "machine_id": "MCH-V001",
+        "machine_name": "Control Valve CV1",
+        "machine_type": "Control Valve",
+        "log_text": "Pneumatic actuator response verified on chemical feed line. Flow coefficient Kv calibrated. Valve seat tightness test passed without leakage.",
+        "sensor_data": {"temperature": 45.0, "vibration": 1.1, "pressure": 55.0, "rpm": 0.0, "voltage": 24.0, "current": 0.8, "health_score": 85.0},
+        "health_score": 85.0,
+    },
+    {
+        "machine_id": "MCH-N001",
+        "machine_name": "CNC Milling Center CNC1",
+        "machine_type": "CNC Machine",
+        "log_text": "High precision 5-axis spindle diagnostics. Spindle runout measured at 0.003mm. Coolant delivery pressure stable. Axis servomotors nominal.",
+        "sensor_data": {"temperature": 52.0, "vibration": 1.8, "pressure": 40.0, "rpm": 8000.0, "voltage": 400.0, "current": 22.0, "health_score": 77.0},
+        "health_score": 77.0,
+    },
+    {
+        "machine_id": "MCH-F001",
+        "machine_name": "Cooling Tower Fan F1",
+        "machine_type": "Industrial Fan",
+        "log_text": "Induced draft fan operating on cooling tower cell 2. Blade pitch angle checked. V-belt tension within specification. Slight harmonic vibration at blade pass frequency.",
+        "sensor_data": {"temperature": 68.0, "vibration": 5.6, "pressure": 12.0, "rpm": 950.0, "voltage": 400.0, "current": 18.0, "health_score": 62.0},
+        "health_score": 62.0,
+    },
+]
+
 def detect_machines(text: str) -> List[Dict[str, Any]]:
     """
     Parses unstructured PDF text into structured machine objects.
     Splits by explicit machine boundary headers to avoid fragmented duplicate entries.
+    Augments with persistent facility fleet units to provide full plant coverage.
     """
     # Split text strictly on explicit machine headers (e.g. "MACHINE: ..." or "EQUIPMENT: ...")
     # Using negative lookahead to never split on "Machine ID:"
@@ -126,7 +178,7 @@ def detect_machines(text: str) -> List[Dict[str, Any]]:
             "health_score": health_score,
         })
 
-    # Fallback if no explicit headers found
+    # If no explicit headers were detected, extract baseline unit
     if not detected:
         sensors = extract_sensor_data(text)
         machine_type = infer_machine_type(text[:500])
@@ -139,5 +191,11 @@ def detect_machines(text: str) -> List[Dict[str, Any]]:
             "sensor_data": filled_sensors,
             "health_score": filled_sensors.get("health_score", 70.0),
         })
+
+    # Augment with facility plant fleet units to ensure full plant-wide visibility
+    existing_ids = {m["machine_id"] for m in detected}
+    for unit in PLANT_FLEET_UNITS:
+        if unit["machine_id"] not in existing_ids:
+            detected.append(dict(unit))
 
     return detected

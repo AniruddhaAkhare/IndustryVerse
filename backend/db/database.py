@@ -77,7 +77,12 @@ def seed_default_machines(db):
         }]
 
     default_session_id = "default_session"
+    existing_ids = {row[0] for row in db.query(MachineLog.machine_id).filter_by(session_id=default_session_id).all()}
+
+    new_count = 0
     for m in machines:
+        if m["machine_id"] in existing_ids:
+            continue
         sensors = m.get("sensor_data", {})
         log = MachineLog(
             session_id=default_session_id,
@@ -96,16 +101,16 @@ def seed_default_machines(db):
             raw_data=m,
         )
         db.add(log)
+        new_count += 1
     db.commit()
-    logger.info(f"Database seeded with {len(machines)} default machines.")
+    logger.info(f"Database verified/seeded with {len(machines)} default machines ({new_count} new added).")
 
 def init_db():
     os.makedirs(os.path.dirname(SQLITE_DB_PATH) if os.path.dirname(SQLITE_DB_PATH) else ".", exist_ok=True)
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
-        if db.query(MachineLog).count() == 0:
-            seed_default_machines(db)
+        seed_default_machines(db)
     except Exception as e:
         logger.warning(f"Error checking/seeding DB on init: {e}")
     finally:
