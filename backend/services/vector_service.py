@@ -166,8 +166,25 @@ import logging
 import json
 from typing import List, Dict, Any
 
-from langchain_chroma import Chroma
-from langchain_community.embeddings import DeterministicFakeEmbedding # Or use GoogleGenerativeAIEmbeddings
+try:
+    from langchain_chroma import Chroma
+except ImportError:
+    try:
+        from langchain_community.vectorstores import Chroma
+    except ImportError:
+        Chroma = None
+
+try:
+    from langchain_community.embeddings import DeterministicFakeEmbedding
+except ImportError:
+    try:
+        from langchain_core.embeddings import FakeEmbeddings as DeterministicFakeEmbedding
+    except ImportError:
+        class DeterministicFakeEmbedding:
+            def __init__(self, size=768): self.size = size
+            def embed_documents(self, texts): return [[0.0]*self.size for _ in texts]
+            def embed_query(self, text): return [0.0]*self.size
+
 from langchain_core.documents import Document
 
 logger = logging.getLogger(__name__)
@@ -175,21 +192,27 @@ logger = logging.getLogger(__name__)
 CHROMA_PERSIST_DIR = os.getenv("CHROMA_PERSIST_DIR", "./db/chroma")
 
 # Initialize the embedding function
-# For a Hackathon, you might want to use GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-# For local speed without downloads, we'll use a placeholder or stay with Chroma's default.
 embeddings = DeterministicFakeEmbedding(size=768) 
 
 def get_vectorstore(collection_name: str = "machine_logs"):
-    """Returns a LangChain Chroma instance."""
-    return Chroma(
-        collection_name=collection_name,
-        embedding_function=embeddings,
-        persist_directory=CHROMA_PERSIST_DIR,
-    )
+    """Returns a LangChain Chroma instance, or None if Chroma is unavailable."""
+    if Chroma is None:
+        return None
+    try:
+        return Chroma(
+            collection_name=collection_name,
+            embedding_function=embeddings,
+            persist_directory=CHROMA_PERSIST_DIR,
+        )
+    except Exception as e:
+        logger.warning(f"Could not initialize Chroma vectorstore: {e}")
+        return None
 
 def store_machine_embeddings(session_id: str, machines: List[Dict[str, Any]]):
     """Converts machine data into LangChain Documents and stores them."""
     vectorstore = get_vectorstore("machine_logs")
+    if vectorstore is None:
+        return
     documents = []
     
     for machine in machines:
@@ -216,6 +239,8 @@ Sensors: {json.dumps(machine.get('sensor_data', {}))}
 def query_similar_logs(query_text: str, session_id: str = None, n_results: int = 5):
     """Performs a similarity search using LangChain's retriever."""
     vectorstore = get_vectorstore("machine_logs")
+    if vectorstore is None:
+        return []
     
     # Apply filter if session_id is provided
     search_kwargs = {"k": n_results}
@@ -236,6 +261,8 @@ def store_dataset_embeddings(dataset_path: str):
         return
     
     vectorstore = get_vectorstore("dataset_logs")
+    if vectorstore is None:
+        return
 
     try:
         if vectorstore._collection.count() > 0:
@@ -264,6 +291,8 @@ def store_dataset_embeddings(dataset_path: str):
 def query_dataset(query_text: str, n_results: int = 5):
     """Directly queries the dataset collection."""
     vectorstore = get_vectorstore("dataset_logs")
+    if vectorstore is None:
+        return []
     try:
         results = vectorstore.similarity_search(query_text, k=n_results)
         return [{"text": doc.page_content, "metadata": doc.metadata} for doc in results]

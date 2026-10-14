@@ -31,6 +31,7 @@ from routers.digitaltwin_router import router as digitaltwin_router
 from routers.chat_router import router as chat_router
 from routers.websocket_router import router as websocket_router
 from routers.hitl_router import router as hitl_router
+from routers.simulation_router import router as simulation_router
 
 # ── Initialize App ─────────────────────────────
 app = FastAPI(
@@ -56,6 +57,7 @@ app.include_router(maintenance_router, prefix="/api", tags=["Maintenance Plannin
 app.include_router(cost_router, prefix="/api", tags=["Cost Planning"])
 app.include_router(digitaltwin_router, prefix="/api", tags=["Digital Twin"])
 app.include_router(chat_router, prefix="/api", tags=["AI RAG Chat"])
+app.include_router(simulation_router, prefix="/api", tags=["3D Simulation"])
 app.include_router(hitl_router, prefix="/api", tags=["Human-in-the-Loop"])
 
 # WebSocket Stream Router (for 3D simulation and digital twin telemetry)

@@ -32,7 +32,11 @@ export const getCostAnalysis = (s: string, m: string) => agentPost("/api/cost-an
 export const getDigitalTwin  = (s: string, m: string, days = 30) =>
   agentPost("/api/digital-twin", s, m, { simulation_days: days });
 
-// 4. AI RAG Chatbot
+// 4. 3D Simulation and Machine Kinematics
+export const getSimulation3D = (s: string, m: string) =>
+  agentPost("/api/simulation-3d", s, m);
+
+// 5. AI RAG Chatbot
 export const sendChat = (s: string, m: string, message: string, history: any[]) =>
   agentPost("/api/chat", s, m, { message, history });
 

@@ -1,19 +1,21 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
+  swcMinify: true,
 
-  // // Redirect root "/" → "/dashboard"
-  // async redirects() {
-  //   return [
-  //     {
-  //       source: "/",
-  //       destination: "/dashboard",
-  //       permanent: false,
-  //     },
-  //   ];
-  // },
+  // Speed up compilation significantly by optimizing heavy barrel imports
+  experimental: {
+    optimizePackageImports: [
+      "@react-three/drei",
+      "@react-three/fiber",
+      "three",
+      "lucide-react",
+      "recharts",
+      "framer-motion",
+    ],
+  },
 
-  // Allow WebSocket upgrade to pass through
+  // Webpack pass-through
   webpack(config) {
     return config;
   },

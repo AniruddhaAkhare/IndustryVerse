@@ -16,8 +16,9 @@ interface Props {
   machineId?: string;    // needed for HITL refine call
 }
 
-// ─── Module-level in-memory cache ──────────────────────────────────────────────
+// ─── Module-level in-memory cache and in-flight promise map ────────────────────
 const CACHE: Record<string, any> = {};
+const IN_FLIGHT: Record<string, Promise<any>> = {};
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function AgentPanel({
@@ -34,20 +35,39 @@ export default function AgentPanel({
   const [error, setError] = useState("");
   const [iteration, setIteration] = useState(0); // HITL iteration count
 
-  // ── Initial fetch ─────────────────────────────────────────────────────────────
+  // ── Initial fetch with in-flight deduplication ──────────────────────────────
   const load = useCallback(async () => {
     if (cacheKey && CACHE[cacheKey]) {
       setData(CACHE[cacheKey]);
       setLoading(false);
       return;
     }
+
     setLoading(true);
     setError("");
+
     try {
-      const r = await fetchFn();
-      if (cacheKey) CACHE[cacheKey] = r.data;
+      let promise: Promise<any>;
+      if (cacheKey && IN_FLIGHT[cacheKey]) {
+        // Reuse ongoing in-flight request to prevent duplicate OPTIONS/POST calls
+        promise = IN_FLIGHT[cacheKey];
+      } else {
+        promise = fetchFn();
+        if (cacheKey) {
+          IN_FLIGHT[cacheKey] = promise;
+        }
+      }
+
+      const r = await promise;
+      if (cacheKey) {
+        CACHE[cacheKey] = r.data;
+        delete IN_FLIGHT[cacheKey];
+      }
       setData(r.data);
     } catch (e: any) {
+      if (cacheKey) {
+        delete IN_FLIGHT[cacheKey];
+      }
       setError(e?.response?.data?.detail || "Agent failed — check backend connection.");
     } finally {
       setLoading(false);

@@ -9,7 +9,11 @@ from typing import Dict, Any, Optional
 import re
 import json
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
+try:
+    from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
+except ImportError:
+    ChatHuggingFace = None
+    HuggingFaceEndpoint = None
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
 
@@ -34,6 +38,9 @@ def get_llm(provider: str = "gemini", model_name: Optional[str] = None, temperat
                 temperature=temperature,
             )
         elif provider == "huggingface":
+            if HuggingFaceEndpoint is None or ChatHuggingFace is None:
+                logger.warning("langchain_huggingface not installed, falling back to gemini")
+                return get_llm("gemini", "gemini-2.5-flash", temperature)
             hf_token = os.getenv("HUGGINGFACEHUB_API_TOKEN")
             endpoint = HuggingFaceEndpoint(
                 repo_id=model_name,

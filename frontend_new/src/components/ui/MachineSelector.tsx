@@ -1,122 +1,263 @@
 "use client";
 import { motion } from "framer-motion";
 
-interface Props { machines: any[]; onSelect: (m: any) => void; }
+interface Props {
+  machines: any[];
+  onSelect: (m: any) => void;
+}
 
 function healthToColor(s: number): string {
-  if (s < 40) return "var(--red)";
-  if (s < 65) return "#e87a3f";
-  if (s < 80) return "var(--amber)";
-  return "var(--green)";
+  if (s < 40) return "#ef4444";
+  if (s < 65) return "#f59e0b";
+  if (s < 80) return "#38bdf8";
+  return "#22c55e";
 }
 
 function healthLabel(s: number): string {
-  if (s < 40) return "CRITICAL";
+  if (s < 40) return "CRITICAL ALERT";
   if (s < 65) return "HIGH RISK";
-  if (s < 80) return "MODERATE";
+  if (s < 80) return "ATTENTION REQ";
   return "NOMINAL";
+}
+
+function getMachineIcon(type: string): string {
+  const t = (type || "").toLowerCase();
+  if (t.includes("motor")) return "⚡";
+  if (t.includes("pump")) return "🔄";
+  if (t.includes("turbine")) return "💨";
+  if (t.includes("compressor")) return "⚙️";
+  return "🏭";
 }
 
 export default function MachineSelector({ machines, onSelect }: Props) {
   return (
-    <div style={{ minHeight: "calc(100vh - 48px)", padding: "56px 24px" }}>
-      <div style={{ maxWidth: 960, margin: "0 auto" }}>
+    <div style={{ minHeight: "calc(100vh - 70px)", padding: "40px 24px 80px" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
 
-        {/* Header */}
+        {/* Header Section */}
         <motion.div
-          initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          style={{ marginBottom: 48 }}
+          style={{ marginBottom: 36, textAlign: "left" }}
         >
-          <p className="section-label" style={{ marginBottom: 8, color: "var(--amber)" }}>
-            SCAN COMPLETE — {machines.length} MACHINE{machines.length !== 1 ? "S" : ""} DETECTED
-          </p>
-          <h2 className="font-display text-3xl font-700" style={{ color: "var(--text-1)", letterSpacing: "-0.02em" }}>
-            Select Machine Unit
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+            <span className="pulse p-green" style={{ width: 8, height: 8, display: "inline-block" }} />
+            <p style={{
+              fontFamily: "var(--f-mono)",
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "0.14em",
+              color: "#38bdf8",
+              textTransform: "uppercase"
+            }}>
+              SCAN COMPLETE — {machines.length} INDUSTRIAL UNIT{machines.length !== 1 ? "S" : ""} IDENTIFIED
+            </p>
+          </div>
+
+          <h2 style={{
+            fontFamily: "var(--font-display)",
+            fontSize: 32,
+            fontWeight: 800,
+            color: "#f8fafc",
+            letterSpacing: "-0.02em",
+            marginBottom: 10
+          }}>
+            Select Machine for Deep AI Diagnostics
           </h2>
-          <p style={{ marginTop: 8, color: "var(--text-3)", fontSize: 13 }}>
-            Each unit runs independently through all 14 AI agent modules.
+
+          <p style={{ color: "#94a3b8", fontSize: 14, maxWidth: 640, lineHeight: 1.6 }}>
+            Each unit connects directly to 5 core intelligence models: Failure Prediction & Root Cause,
+            Maintenance & Cost Planning, AI RAG Knowledge Assistant, Digital Twin, and 3D Kinematics.
           </p>
-          <div className="divider" style={{ marginTop: 24 }} />
+          <div style={{ width: "100%", height: 1, background: "rgba(255,255,255,0.08)", marginTop: 24 }} />
         </motion.div>
 
-        {/* Machine grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 1 }}>
+        {/* Machine Cards Grid */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+          gap: 24,
+        }}>
           {machines.map((m, i) => {
             const sensors = m.sensor_data || {};
             const hs = sensors.health_score ?? m.health_score ?? 75;
             const hColor = healthToColor(hs);
             const hLabel = healthLabel(hs);
+            const icon = getMachineIcon(m.machine_type);
 
             return (
               <motion.div
                 key={m.machine_id}
-                initial={{ opacity: 0, y: 8 }}
+                initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.06, duration: 0.4, ease: [0.16,1,0.3,1] }}
+                transition={{ delay: i * 0.08, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                 onClick={() => onSelect(m)}
+                whileHover={{ y: -4, borderColor: hColor, boxShadow: `0 12px 30px -10px ${hColor}33` }}
                 style={{
-                  background: "var(--bg-2)",
-                  border: "1px solid var(--line)",
-                  padding: "24px",
+                  background: "rgba(15, 23, 42, 0.65)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  borderRadius: 14,
+                  padding: 24,
                   cursor: "pointer",
-                  transition: "border-color 0.2s, background 0.2s",
+                  transition: "all 0.25s ease",
                   position: "relative",
                   overflow: "hidden",
+                  backdropFilter: "blur(12px)",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
                 }}
-                className="group"
-                whileHover={{ borderColor: "rgba(245,166,35,0.35)", backgroundColor: "var(--bg-3)" } as any}
               >
-                {/* Index */}
-                <div className="font-mono text-2xs" style={{ color: "var(--text-3)", marginBottom: 16 }}>
-                  UNIT_{String(i + 1).padStart(2, "0")}
-                </div>
+                {/* Subtle colored accent glow in top corner */}
+                <div style={{
+                  position: "absolute",
+                  top: 0,
+                  right: 0,
+                  width: 140,
+                  height: 140,
+                  background: `radial-gradient(circle at top right, ${hColor}18, transparent 70%)`,
+                  pointerEvents: "none",
+                }} />
 
-                {/* Health arc */}
-                <div style={{ position: "absolute", top: 20, right: 20, opacity: 0.8 }}>
-                  <svg width="44" height="44" viewBox="0 0 44 44">
-                    <circle cx="22" cy="22" r="18" fill="none" stroke="var(--line-2)" strokeWidth="2" />
-                    <circle cx="22" cy="22" r="18" fill="none"
-                      stroke={hColor}
-                      strokeWidth="2"
-                      strokeLinecap="butt"
-                      strokeDasharray={`${2 * Math.PI * 18 * hs / 100} ${2 * Math.PI * 18}`}
-                      transform="rotate(-90 22 22)"
-                    />
-                    <text x="22" y="26" textAnchor="middle" fill={hColor}
-                      style={{ fontSize: 9, fontFamily: "var(--font-mono)", fontWeight: 400 }}>
-                      {Math.round(hs)}
-                    </text>
-                  </svg>
-                </div>
-
-                {/* Name */}
-                <h3 className="font-display font-600" style={{ fontSize: 16, color: "var(--text-1)", marginBottom: 4, marginRight: 52, lineHeight: 1.3 }}>
-                  {m.machine_name}
-                </h3>
-                <p style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 16 }}>
-                  {m.machine_type || "Industrial Equipment"}
-                </p>
-
-                {/* Status tag */}
-                <span className={`tag ${hs < 40 ? "tag-red" : hs < 65 ? "tag" : hs < 80 ? "tag-amber" : "tag-green"}`}
-                  style={hs >= 40 && hs < 65 ? { background: "rgba(232,122,63,0.12)", color: "#e87a3f", border: "1px solid rgba(232,122,63,0.3)" } : {}}>
-                  {hLabel}
-                </span>
-
-                {/* Sensor pills */}
-                <div style={{ marginTop: 16, display: "flex", flexWrap: "wrap", gap: 6 }}>
-                  {Object.entries(sensors).filter(([k]) => k !== "health_score").slice(0, 3).map(([k, v]) => (
-                    <div key={k} style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--text-3)", letterSpacing: "0.05em" }}>
-                      {k.replace("_", " ")}: <span style={{ color: "var(--text-2)" }}>{typeof v === "number" ? v.toFixed(1) : String(v)}</span>
+                <div>
+                  {/* Top Bar: Unit ID & Status Pill */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontSize: 18 }}>{icon}</span>
+                      <span style={{
+                        fontFamily: "var(--f-mono)",
+                        fontSize: 11,
+                        color: "#94a3b8",
+                        letterSpacing: "0.08em",
+                        fontWeight: 600
+                      }}>
+                        UNIT {String(i + 1).padStart(2, "0")} · {m.machine_id}
+                      </span>
                     </div>
-                  ))}
+
+                    <span style={{
+                      fontFamily: "var(--f-mono)",
+                      fontSize: 10,
+                      fontWeight: 700,
+                      letterSpacing: "0.08em",
+                      padding: "4px 10px",
+                      borderRadius: 9999,
+                      background: `${hColor}18`,
+                      color: hColor,
+                      border: `1px solid ${hColor}44`,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                    }}>
+                      <span style={{ width: 6, height: 6, borderRadius: "50%", background: hColor }} />
+                      {hLabel}
+                    </span>
+                  </div>
+
+                  {/* Machine Name & Type */}
+                  <h3 style={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: 20,
+                    fontWeight: 700,
+                    color: "#f8fafc",
+                    marginBottom: 4,
+                    lineHeight: 1.3
+                  }}>
+                    {m.machine_name}
+                  </h3>
+                  <p style={{ fontSize: 13, color: "#64748b", marginBottom: 20 }}>
+                    {m.machine_type || "Industrial Asset"}
+                  </p>
+
+                  {/* Health Score Gauge Bar */}
+                  <div style={{
+                    background: "rgba(0,0,0,0.3)",
+                    padding: "12px 14px",
+                    borderRadius: 8,
+                    border: "1px solid rgba(255,255,255,0.05)",
+                    marginBottom: 20
+                  }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                      <span style={{ fontFamily: "var(--f-mono)", fontSize: 10, color: "#94a3b8", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                        Health Score Index
+                      </span>
+                      <span style={{ fontFamily: "var(--f-mono)", fontSize: 13, fontWeight: 700, color: hColor }}>
+                        {Math.round(hs)} / 100
+                      </span>
+                    </div>
+                    <div style={{ height: 6, background: "rgba(255,255,255,0.08)", borderRadius: 3, overflow: "hidden" }}>
+                      <div style={{
+                        height: "100%",
+                        width: `${Math.min(100, Math.max(0, hs))}%`,
+                        background: hColor,
+                        borderRadius: 3,
+                        boxShadow: `0 0 8px ${hColor}80`,
+                        transition: "width 0.6s ease"
+                      }} />
+                    </div>
+                  </div>
+
+                  {/* Sensor Metrics 4-Pack */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
+                    <div style={{ background: "rgba(255,255,255,0.03)", padding: "8px 12px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.05)" }}>
+                      <p style={{ fontFamily: "var(--f-mono)", fontSize: 9, color: "#64748b", textTransform: "uppercase", marginBottom: 2 }}>Temp</p>
+                      <p style={{ fontFamily: "var(--f-mono)", fontSize: 13, fontWeight: 600, color: "#e2e8f0" }}>
+                        {sensors.temperature !== undefined ? `${sensors.temperature.toFixed(1)} °C` : "72.0 °C"}
+                      </p>
+                    </div>
+
+                    <div style={{ background: "rgba(255,255,255,0.03)", padding: "8px 12px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.05)" }}>
+                      <p style={{ fontFamily: "var(--f-mono)", fontSize: 9, color: "#64748b", textTransform: "uppercase", marginBottom: 2 }}>Vibration</p>
+                      <p style={{ fontFamily: "var(--f-mono)", fontSize: 13, fontWeight: 600, color: sensors.vibration > 6 ? "#f59e0b" : "#e2e8f0" }}>
+                        {sensors.vibration !== undefined ? `${sensors.vibration.toFixed(1)} mm/s` : "3.2 mm/s"}
+                      </p>
+                    </div>
+
+                    <div style={{ background: "rgba(255,255,255,0.03)", padding: "8px 12px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.05)" }}>
+                      <p style={{ fontFamily: "var(--f-mono)", fontSize: 9, color: "#64748b", textTransform: "uppercase", marginBottom: 2 }}>Pressure</p>
+                      <p style={{ fontFamily: "var(--f-mono)", fontSize: 13, fontWeight: 600, color: "#e2e8f0" }}>
+                        {sensors.pressure !== undefined ? `${sensors.pressure.toFixed(1)} PSI` : "45.0 PSI"}
+                      </p>
+                    </div>
+
+                    <div style={{ background: "rgba(255,255,255,0.03)", padding: "8px 12px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.05)" }}>
+                      <p style={{ fontFamily: "var(--f-mono)", fontSize: 9, color: "#64748b", textTransform: "uppercase", marginBottom: 2 }}>RPM Velocity</p>
+                      <p style={{ fontFamily: "var(--f-mono)", fontSize: 13, fontWeight: 600, color: "#e2e8f0" }}>
+                        {sensors.rpm !== undefined ? `${Math.round(sensors.rpm)}` : "1,450"}
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Bottom CTA */}
-                <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid var(--line)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span className="section-label" style={{ color: "var(--text-3)" }}>Open Analysis</span>
-                  <span style={{ color: "var(--amber)", fontSize: 12, fontFamily: "var(--font-mono)" }}>→</span>
+                {/* Bottom Action Button */}
+                <div style={{
+                  paddingTop: 16,
+                  borderTop: "1px solid rgba(255,255,255,0.08)",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center"
+                }}>
+                  <span style={{
+                    fontFamily: "var(--f-mono)",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "#38bdf8",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6
+                  }}>
+                    Enter AI Analysis
+                  </span>
+                  <span style={{
+                    color: "#38bdf8",
+                    fontSize: 14,
+                    fontWeight: 700,
+                    fontFamily: "var(--f-mono)",
+                    transition: "transform 0.2s"
+                  }}>
+                    →
+                  </span>
                 </div>
               </motion.div>
             );
