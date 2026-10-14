@@ -7,38 +7,27 @@ import FailureTab from "@/components/tabs/FailureTab";
 import RootCauseTab from "@/components/tabs/RootCauseTab";
 import MaintenanceTab from "@/components/tabs/MaintenanceTab";
 import CostTab from "@/components/tabs/CostTab";
-import SparePartsTab from "@/components/tabs/SparePartsTab";
-import TimelineTab from "@/components/tabs/TimelineTab";
-import AlertsTab from "@/components/tabs/AlertsTab";
-import WorkforceTab from "@/components/tabs/WorkforceTab";
-import StrategyTab from "@/components/tabs/StrategyTab";
 import DigitalTwinTab from "@/components/tabs/DigitalTwinTab";
-import WhatIfTab from "@/components/tabs/WhatIfTab";
-import AnomalyTab from "@/components/tabs/AnomalyTab";
-import ChatTab from "@/components/tabs/ChatTab";
 import View3DTab from "@/components/tabs/View3DTab";
-import CascadeTab from "@/components/tabs/CascadeTab";
+import ChatTab from "@/components/tabs/ChatTab";
 
 const TABS = [
-  { id:"overview",    label:"Overview",      icon:"◎" },
-  { id:"failure",     label:"Failure",       icon:"▲" },
-  { id:"rootcause",   label:"Root Cause",    icon:"◉" },
-  { id:"maintenance", label:"Maintenance",   icon:"⊕" },
-  { id:"cost",        label:"Cost",          icon:"◈" },
-  { id:"spareparts",  label:"Spare Parts",   icon:"⊞" },
-  { id:"timeline",    label:"Timeline",      icon:"⊟" },
-  { id:"alerts",      label:"Alerts",        icon:"◆" },
-  { id:"anomaly",     label:"Anomaly",       icon:"◐" },
-  { id:"workforce",   label:"Workforce",     icon:"⊕" },
-  { id:"strategy",    label:"Strategy",      icon:"◇" },
-  { id:"digitaltwin", label:"Digital Twin",  icon:"⬡" },
-  { id:"whatif",      label:"What-If",       icon:"◑" },
-  { id:"3dview",      label:"3D Blueprint",  icon:"⬢" },
-  { id:"cascade",     label:"Impact Simulation", icon:"⚡" },
-  { id:"chat",        label:"AI Chat",       icon:"▣" },
+  { id: "overview",    label: "Overview",             icon: "◎" },
+  { id: "failure",     label: "Failure Prediction",   icon: "▲" },
+  { id: "rootcause",   label: "Root Cause Analysis",  icon: "◉" },
+  { id: "maintenance", label: "Maintenance Plan",     icon: "⊕" },
+  { id: "cost",        label: "Cost Planning",        icon: "◈" },
+  { id: "digitaltwin", label: "Digital Twin",         icon: "⬡" },
+  { id: "3dview",      label: "3D Simulation",        icon: "⬢" },
+  { id: "chat",        label: "AI RAG Chat",          icon: "▣" },
 ];
 
-interface Props { sessionId:string; machine:any; allMachines:any[]; onChangeMachine:(m:any)=>void; }
+interface Props {
+  sessionId: string;
+  machine: any;
+  allMachines: any[];
+  onChangeMachine: (m: any) => void;
+}
 
 export default function MainDashboard({ sessionId, machine, allMachines, onChangeMachine }: Props) {
   const [tab, setTab] = useState("overview");
@@ -51,17 +40,9 @@ export default function MainDashboard({ sessionId, machine, allMachines, onChang
       case "rootcause":   return <RootCauseTab sessionId={s} machineId={m} />;
       case "maintenance": return <MaintenanceTab sessionId={s} machineId={m} />;
       case "cost":        return <CostTab sessionId={s} machineId={m} />;
-      case "spareparts":  return <SparePartsTab sessionId={s} machineId={m} />;
-      case "timeline":    return <TimelineTab sessionId={s} machineId={m} />;
-      case "alerts":      return <AlertsTab sessionId={s} machineId={m} />;
-      case "anomaly":     return <AnomalyTab sessionId={s} machineId={m} />;
-      case "workforce":   return <WorkforceTab sessionId={s} machineId={m} />;
-      case "strategy":    return <StrategyTab sessionId={s} machineId={m} />;
       case "digitaltwin": return <DigitalTwinTab sessionId={s} machineId={m} />;
-      case "whatif":      return <WhatIfTab sessionId={s} machineId={m} />;
       case "3dview":      return <View3DTab sessionId={s} machineId={m} machineName={n} machineType={machine.machine_type} />;
       case "chat":        return <ChatTab sessionId={s} machineId={m} machineName={n} />;
-      case "cascade":     return <CascadeTab sessionId={s} machineId={m} machineName={n} />;
       default:            return <OverviewTab machine={machine} />;
     }
   };

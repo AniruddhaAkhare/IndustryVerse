@@ -1,5 +1,5 @@
 """
-realtime_stream_service.py — MachinaOracle Real-Time Control Panel
+realtime_stream_service.py — Industry Verse AI Real-Time Control Panel
 ===================================================================
 Generates realistic, context-aware machine telemetry by:
   1. Sampling records from the 5000-entry JSON dataset

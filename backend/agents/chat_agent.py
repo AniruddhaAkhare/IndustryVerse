@@ -21,7 +21,7 @@ class ChatAgent(BaseAgent):
         context_docs = "\n".join([s["text"][:300] for s in similar[:2]])
         dataset_docs = "\n".join([d["text"][:300] for d in dataset_ctx[:2]])
         
-        prompt = f"""You are MachinaOracle's expert AI assistant for industrial factory operations, predictive maintenance, and machine intelligence. You have deep knowledge of industrial systems, failure modes, and maintenance strategies.
+        prompt = f"""You are Industry Verse AI's expert assistant for industrial factory operations, predictive maintenance, and machine intelligence. You have deep knowledge of industrial systems, failure modes, and maintenance strategies.
 
 CURRENT MACHINE:
 {machine_ctx}

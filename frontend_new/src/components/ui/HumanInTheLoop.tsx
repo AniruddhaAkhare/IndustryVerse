@@ -38,21 +38,12 @@ interface Props {
 
 type PanelState = "question" | "correcting" | "refining" | "accepted" | "closed";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
 const AGENT_LABELS: Record<string, string> = {
   failure:     "Failure Prediction",
   rootcause:   "Root Cause Analysis",
   maintenance: "Maintenance Planner",
   cost:        "Cost Analysis",
-  spareparts:  "Spare Parts",
-  timeline:    "Timeline Prediction",
-  alerts:      "Smart Alerts",
-  anomaly:     "Anomaly Detection",
-  workforce:   "Workforce Planner",
-  strategy:    "Strategy Optimizer",
   digitaltwin: "Digital Twin",
-  whatif:      "What-If Simulator",
-  cascade:     "Cascade Intelligence",
   overview:    "Overview",
   chat:        "Chat Assistant",
   "3dview":    "3D Blueprint",

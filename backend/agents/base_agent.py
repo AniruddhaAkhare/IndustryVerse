@@ -1,4 +1,4 @@
-"""Base agent class for all MachinaOracle agents"""
+"""Base agent class for all Industry Verse AI agents"""
 from services.gemini_service import generate_json_response, generate_response
 from services.vector_service import query_similar_logs, query_dataset
 from typing import Dict, Any, List

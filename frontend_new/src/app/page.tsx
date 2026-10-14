@@ -74,14 +74,14 @@ export default function Home() {
           </svg>
           <div>
             <div style={{ fontFamily:"var(--f-cond)", fontSize:18, fontWeight:800, letterSpacing:"0.1em", color:"var(--t1)", lineHeight:1 }}>
-              MACHINA<span style={{ color:"var(--blue)" }}>ORACLE</span>
+              INDUSTRY<span style={{ color:"var(--blue)" }}>VERSE AI</span>
             </div>
             <div style={{ fontFamily:"var(--f-mono)", fontSize:10, color:"var(--t4)", letterSpacing:"0.13em", marginTop:2 }}>
-              INDUSTRIAL AI MONITORING PLATFORM
+              INDUSTRIAL INTELLIGENCE PLATFORM
             </div>
           </div>
           <div style={{ width:1, height:30, background:"var(--bd-1)", margin:"0 4px" }} />
-          <span style={{ fontFamily:"var(--f-mono)", fontSize:11, color:"var(--t4)" }}>Gemini 2.5 Flash · 14 AI Agents</span>
+          <span style={{ fontFamily:"var(--f-mono)", fontSize:11, color:"var(--t4)" }}>Gemini 2.5 Flash · 5 Core AI Models</span>
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:18 }}>
           <div style={{ display:"flex", alignItems:"center", gap:8 }}>

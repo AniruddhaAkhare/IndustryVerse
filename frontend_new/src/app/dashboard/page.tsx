@@ -10,7 +10,7 @@ import LiveLogPanel from "@/components/realtime/LiveLogPanel";
 import AnalyticsDashboard from "@/components/realtime/AnalyticsDashboard";
 import { uploadPDF } from "@/lib/api";
 
-const rawWs = process.env.NEXT_PUBLIC_WS_URL || "wss://machinaoracle.onrender.com";
+const rawWs = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000";
 const WS_URL = rawWs.endsWith("/ws/stream") ? rawWs : `${rawWs.replace(/\/$/, "")}/ws/stream`;
 
 const MAX_TREND = 60;
@@ -118,7 +118,7 @@ export default function ControlRoom() {
               color: "#E2E8F0",
             }}
           >
-            MACHINA<span style={{ color: "#3B82F6" }}>ORACLE</span>
+            INDUSTRY<span style={{ color: "#3B82F6" }}>VERSE AI</span>
           </span>
 
           <div style={{ width: 1, height: 20, background: "rgba(255,255,255,0.1)" }} />

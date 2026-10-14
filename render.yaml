@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: machina-oracle-backend
+    name: industry-verse-ai-backend
     runtime: python
     region: oregon
     rootDir: backend

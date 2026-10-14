@@ -16,7 +16,7 @@ const SUGGESTED = [
 
 export default function ChatTab({ sessionId, machineId, machineName }: Props) {
   const [messages, setMessages] = useState<Message[]>([
-    { role: "assistant", content: `Hello! I am MachinaOracle's AI assistant specialized in industrial machinery analysis. I have full context on **${machineName}** — ask me anything about its health, failures, maintenance, costs, or operational strategy.` }
+    { role: "assistant", content: `Hello! I am Industry Verse AI's assistant specialized in industrial machinery analysis. I have full context on **${machineName}** — ask me anything about its health, failures, maintenance, costs, or digital twin simulation.` }
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -56,7 +56,7 @@ export default function ChatTab({ sessionId, machineId, machineName }: Props) {
               {msg.role === "assistant" && (
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
-                  <span className="text-xs font-mono text-cyan-400/70">MACHINA ORACLE AI</span>
+                  <span className="text-xs font-mono text-cyan-400/70">INDUSTRY VERSE AI</span>
                 </div>
               )}
               <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>

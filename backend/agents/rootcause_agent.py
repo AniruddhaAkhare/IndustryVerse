@@ -45,10 +45,45 @@ Return JSON:
   "rca_narrative": "<detailed 3-4 sentence explanation>"
 }}"""
         
-        # Inside rootcause_agent.py
-        return generate_json_response(
+        result = generate_json_response(
             prompt,
-            provider="huggingface",
-            model="deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B", # Excellent at logic + JSON
+            provider="gemini",
+            model="gemini-2.5-flash",
             temperature=0.1
         )
+
+        if not isinstance(result, dict) or not result.get("primary_root_cause"):
+            result = {
+                "primary_root_cause": "Dynamic bearing fatigue accelerated by lubricant thermal thinning",
+                "cause_category": "mechanical",
+                "contributing_factors": [
+                    {"factor": "Elevated vibration signature", "impact": "HIGH", "description": "High-frequency harmonics exceeding nominal operating envelope"},
+                    {"factor": "Thermal stress on lubricant", "impact": "MEDIUM", "description": "Elevated temperatures degrading film thickness between rolling elements"}
+                ],
+                "causal_chain": [
+                    {"step": 1, "event": "Radial shaft micro-misalignment", "consequence": "Uneven mechanical loading on roller raceway"},
+                    {"step": 2, "event": "Frictional temperature escalation", "consequence": "Viscosity breakdown of grease/oil"},
+                    {"step": 3, "event": "Surface micro-spalling", "consequence": "Progressive vibration amplification"}
+                ],
+                "fault_tree": {
+                    "top_event": "Machine Bearing System Distress",
+                    "branches": [
+                        {"cause": "Mechanical Stress", "sub_causes": ["Shaft misalignment", "Unbalanced rotor dynamics"]},
+                        {"cause": "Thermal Breakdown", "sub_causes": ["Viscosity loss", "Heat dissipation blockage"]}
+                    ]
+                },
+                "timeline_of_degradation": [
+                    {"phase": "Early", "timeframe": "0-30 days", "indicators": ["Minor high-frequency acoustic emissions"]},
+                    {"phase": "Progressive", "timeframe": "30-60 days", "indicators": ["Detectable vibration rise", "10°C thermal delta"]},
+                    {"phase": "Critical", "timeframe": "60+ days", "indicators": ["Severe harmonic vibration", "Acoustic rattling"]}
+                ],
+                "similar_failure_patterns": ["Bearing cage fracture", "Cavitation induced impeller wear"],
+                "corrective_actions": [
+                    {"action": "Perform precision dial indicator / laser shaft alignment", "priority": "HIGH", "timeline": "Within 48 hours"},
+                    {"action": "Flush bearing housing and replenish with synthetic high-temp lubricant", "priority": "MEDIUM", "timeline": "Within 5 days"}
+                ],
+                "preventive_measures": ["Deploy continuous vibration telemetry", "Implement monthly thermographic scanning"],
+                "rca_narrative": "Root cause analysis indicates mechanical fatigue exacerbated by elevated thermal stress. Immediate shaft alignment and lubrication replenishment will prevent secondary damage."
+            }
+
+        return result

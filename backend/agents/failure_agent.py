@@ -44,8 +44,8 @@ Provide a comprehensive failure prediction analysis. Return a JSON object with t
         from services.gemini_service import generate_json_response
         result = generate_json_response(
             prompt,
-            provider="huggingface",
-            model="deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B", # Excellent at logic + JSON
+            provider="gemini",
+            model="gemini-2.5-flash",
             temperature=0.1
         )
         # Inside rootcause_agent.py 

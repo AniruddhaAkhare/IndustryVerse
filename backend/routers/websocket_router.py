@@ -13,7 +13,7 @@ async def websocket_stream(websocket: WebSocket):
     try:
         await websocket.send_json({
             "type": "connected",
-            "message": "MachinaOracle stream active"
+            "message": "Industry Verse AI stream active"
         })
 
         async for payload in stream_realtime(interval_secs=5):

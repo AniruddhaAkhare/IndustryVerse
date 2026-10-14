@@ -8,7 +8,7 @@
 import { useEffect, useRef, useCallback, useReducer } from "react";
 
 const WS_URL =
-  process.env.NEXT_PUBLIC_WS_URL || "wss://machinaoracle.onrender.com/ws/stream";
+  process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/ws/stream";
 
 const MAX_HISTORY = 60; // data-points kept per machine
 
@@ -88,7 +88,7 @@ export function useRealtimeStream() {
     wsRef.current = ws;
 
     ws.onopen = () => {
-      console.log("[MachinaOracle] WebSocket connected");
+      console.log("[IndustryVerseAI] WebSocket connected");
     };
 
     ws.onmessage = (evt) => {

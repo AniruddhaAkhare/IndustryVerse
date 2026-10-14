@@ -55,15 +55,7 @@ AGENT_META: Dict[str, Dict[str, str]] = {
     "rootcause":    {"name": "Root Cause Analysis Agent",    "role": "root cause analysis (RCA) engineer"},
     "maintenance":  {"name": "Maintenance Planner Agent",    "role": "maintenance planning engineer"},
     "cost":         {"name": "Cost Analysis Agent",          "role": "industrial cost analysis expert"},
-    "spareparts":   {"name": "Spare Parts Agent",            "role": "spare parts optimization expert"},
-    "timeline":     {"name": "Timeline Prediction Agent",    "role": "predictive analytics timeline expert"},
-    "alerts":       {"name": "Smart Alert Agent",            "role": "industrial alert management expert"},
-    "anomaly":      {"name": "Anomaly Detection Agent",      "role": "industrial IoT anomaly detection expert"},
-    "workforce":    {"name": "Workforce Planner Agent",      "role": "workforce planning expert for industrial maintenance"},
-    "strategy":     {"name": "Strategy Optimizer Agent",     "role": "strategic maintenance advisor"},
     "digitaltwin":  {"name": "Digital Twin Agent",           "role": "digital twin simulation engine"},
-    "whatif":       {"name": "What-If Simulation Agent",     "role": "what-if scenario analysis expert"},
-    "cascade":      {"name": "Cascade Intelligence Engine",  "role": "industrial cascade failure simulation expert"},
     "overview":     {"name": "Overview Agent",               "role": "industrial machine health overview expert"},
     "chat":         {"name": "Chat Assistant Agent",         "role": "intelligent industrial AI assistant"},
     "3dview":       {"name": "Failure Prediction Agent",     "role": "predictive maintenance and failure analysis expert"},
@@ -93,7 +85,7 @@ def _build_refinement_prompt(
 
     prev_json = json.dumps(previous_response, indent=2)
 
-    return f"""You are a {meta["role"]} — {meta["name"]} for MachinaOracle.
+    return f"""You are a {meta["role"]} — {meta["name"]} for Industry Verse AI.
 
 MACHINE CONTEXT:
 {machine_ctx}

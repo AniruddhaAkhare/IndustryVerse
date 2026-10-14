@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "MachinaOracle — Factory Intelligence Platform",
-  description: "Autonomous AI for Predictive Maintenance",
+  title: "Industry Verse AI — Factory Intelligence Platform",
+  description: "Autonomous Industrial AI for Predictive Maintenance & Digital Twin",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
