@@ -74,8 +74,19 @@ IndustryVerse/
 │   │   ├── maintenance_agent.py
 │   │   ├── cost_agent.py
 │   │   ├── digitaltwin_agent.py
+│   │   ├── simulation_agent.py
 │   │   └── chat_agent.py
 │   ├── routers/                 # Clean REST & WebSocket API endpoints
+│   │   ├── upload_router.py
+│   │   ├── failure_router.py
+│   │   ├── rootcause_router.py
+│   │   ├── maintenance_router.py
+│   │   ├── cost_router.py
+│   │   ├── digitaltwin_router.py
+│   │   ├── simulation_router.py
+│   │   ├── chat_router.py
+│   │   ├── hitl_router.py
+│   │   └── websocket_router.py
 │   ├── services/                # Gemini LLM, Vector RAG & Real-Time Stream
 │   ├── db/                      # SQLite models and ChromaDB store
 │   └── requirements.txt         # Python dependencies
@@ -95,22 +106,38 @@ IndustryVerse/
 ## ⚡ Setup & Installation
 
 ### Prerequisites
-- Python 3.10+
+- Python 3.10 or 3.11
 - Node.js 18+ & npm
+- Git
+
+### 0. Clone Repository
+```bash
+git clone https://github.com/AniruddhaAkhare/IndustryVerse.git
+cd IndustryVerse
+```
 
 ### 1. Backend Setup
 ```bash
 cd backend
 python -m venv venv
-# Windows:
-.\venv\Scripts\activate
-# Linux/macOS:
+
+# Activate Virtual Environment:
+# On Windows (PowerShell):
+.\venv\Scripts\Activate.ps1
+# On Windows (Command Prompt):
+.\venv\Scripts\activate.bat
+# On Linux / macOS:
 source venv/bin/activate
 
+# Install dependencies:
 pip install -r requirements.txt
 ```
 
-Configure `backend/.env`:
+Create `backend/.env` (or copy from `.env.example`):
+```bash
+cp .env.example .env
+```
+Ensure your Gemini API Key is configured in `backend/.env`:
 ```env
 GEMINI_API_KEY=your_gemini_api_key_here
 SQLITE_DB_PATH=./db/machina.db
@@ -118,18 +145,19 @@ CHROMA_PERSIST_DIR=./db/chroma
 DATASET_PATH=./data/machine_logs.json
 ```
 
-Start backend:
+Start the FastAPI backend:
 ```bash
 python main.py
-# Server runs on http://localhost:8000
+# Server runs on http://localhost:8000 (Swagger docs at http://localhost:8000/docs)
 ```
 
 ### 2. Frontend Setup
+In a new terminal window:
 ```bash
 cd frontend_new
 npm install
 npm run dev
-# App runs on http://localhost:3000
+# Application opens at http://localhost:3000
 ```
 
 ---
@@ -144,6 +172,7 @@ npm run dev
 | `POST` | `/api/maintenance-plan` | Generate prescriptive maintenance schedules | Model 2 |
 | `POST` | `/api/cost-analysis` | Calculate repair margins and downtime impact | Model 2 |
 | `POST` | `/api/digital-twin` | Run projected day-by-day machine simulation | Model 4 |
+| `POST` | `/api/simulation-3d` | Run 3D finite element, kinematic, & stress simulation | Model 5 |
 | `POST` | `/api/chat` | Conversational RAG assistance | Model 3 |
 | `POST` | `/api/hitl-refine` | Human-in-the-Loop refinement of AI predictions | All Models |
 | `WS`   | `/ws/stream` | Real-time WebSocket sensor telemetry stream | Model 5 |
