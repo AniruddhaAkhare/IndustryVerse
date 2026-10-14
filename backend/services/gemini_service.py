@@ -20,10 +20,14 @@ from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
 logger = logging.getLogger(__name__)
 _llm_cache: Dict[str, Any] = {}
 
+def get_default_gemini_model() -> str:
+    """Retrieve the default Gemini model, preferring lightweight/high-quota variants."""
+    return os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
+
 def get_llm(provider: str = "gemini", model_name: Optional[str] = None, temperature: float = 0.1):
     """Retrieve or initialize cached LLM instance."""
     if not model_name:
-        model_name = "gemini-2.5-flash" if provider == "gemini" else "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
+        model_name = get_default_gemini_model() if provider == "gemini" else "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
 
     cache_key = f"{provider}_{model_name}_{temperature}"
     
@@ -36,11 +40,13 @@ def get_llm(provider: str = "gemini", model_name: Optional[str] = None, temperat
                 model=model_name,
                 google_api_key=api_key,
                 temperature=temperature,
+                max_retries=1,  # Do not block for 2+ minutes retrying exhausted 429 quotas
+                timeout=20.0,
             )
         elif provider == "huggingface":
             if HuggingFaceEndpoint is None or ChatHuggingFace is None:
                 logger.warning("langchain_huggingface not installed, falling back to gemini")
-                return get_llm("gemini", "gemini-2.5-flash", temperature)
+                return get_llm("gemini", get_default_gemini_model(), temperature)
             hf_token = os.getenv("HUGGINGFACEHUB_API_TOKEN")
             endpoint = HuggingFaceEndpoint(
                 repo_id=model_name,
@@ -48,6 +54,7 @@ def get_llm(provider: str = "gemini", model_name: Optional[str] = None, temperat
                 max_new_tokens=2048,
                 temperature=max(temperature, 0.01),
                 huggingfacehub_api_token=hf_token,
+                timeout=25.0,
             )
             _llm_cache[cache_key] = ChatHuggingFace(llm=endpoint)
         else:
@@ -56,17 +63,19 @@ def get_llm(provider: str = "gemini", model_name: Optional[str] = None, temperat
     return _llm_cache[cache_key]
 
 
-def generate_response(prompt: str, provider: str = "gemini", model: str = "gemini-2.5-flash", temperature: float = 0.3) -> str:
+def generate_response(prompt: str, provider: str = "gemini", model: Optional[str] = None, temperature: float = 0.3) -> str:
     """Generates a plain text response (Used by ChatAgent)."""
+    target_model = model or get_default_gemini_model()
     try:
-        llm = get_llm(provider, model, temperature)
+        llm = get_llm(provider, target_model, temperature)
         chain = ChatPromptTemplate.from_template("{input}") | llm | StrOutputParser()
         return chain.invoke({"input": prompt})
     except Exception as e:
-        logger.warning(f"Primary text generation failed ({provider}/{model}): {e}. Attempting Gemini fallback...")
-        if provider != "gemini":
+        logger.warning(f"Primary text generation failed ({provider}/{target_model}): {e}. Attempting Gemini fallback...")
+        fallback_model = "gemini-2.5-flash-lite"
+        if target_model != fallback_model:
             try:
-                fallback_llm = get_llm("gemini", "gemini-2.5-flash", temperature)
+                fallback_llm = get_llm("gemini", fallback_model, temperature)
                 chain = ChatPromptTemplate.from_template("{input}") | fallback_llm | StrOutputParser()
                 return chain.invoke({"input": prompt})
             except Exception as fb_err:
@@ -139,43 +148,55 @@ def _invoke_chain(llm, prompt: str, provider: str) -> str:
 
 def generate_json_response(
     prompt: str,
-    provider: str = "huggingface",
-    model: str = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
+    provider: str = "gemini",
+    model: Optional[str] = None,
     temperature: float = 0.1
 ) -> Dict[str, Any]:
     """
-    Generates a structured JSON response with automatic fallback to Gemini.
-    Guarantees a clean dictionary return without raising unhandled exceptions.
+    Generates a structured JSON response with automatic multi-tier fallback.
+    Guarantees crash-free execution:
+    1. Primary requested provider/model
+    2. Fallback to gemini-2.5-flash-lite if primary encounters 429 quota exhaustion or timeouts
+    3. Safe structured fallback dictionary
     """
     parser = JsonOutputParser()
+    target_model = model or get_default_gemini_model()
 
     # Attempt 1: Requested provider/model
     try:
-        llm = get_llm(provider, model, temperature)
+        llm = get_llm(provider, target_model, temperature)
         raw_output = _invoke_chain(llm, prompt, provider)
         if raw_output:
             cleaned = _extract_json(raw_output)
             try:
-                return json.loads(cleaned)
+                data = json.loads(cleaned)
+                if isinstance(data, dict):
+                    return data
             except Exception:
-                return parser.parse(cleaned)
+                data = parser.parse(cleaned)
+                if isinstance(data, dict):
+                    return data
     except Exception as e1:
-        logger.warning(f"[generate_json_response] Provider {provider}/{model} encountered issue: {e1}")
+        logger.warning(f"[generate_json_response] Provider {provider}/{target_model} encountered issue: {e1}")
 
-    # Attempt 2: Fallback to Gemini 2.5 Flash
-    if provider != "gemini":
+    # Attempt 2: If primary failed and wasn't gemini-2.5-flash-lite, fallback to gemini-2.5-flash-lite
+    if target_model != "gemini-2.5-flash-lite":
         try:
-            logger.info("[generate_json_response] Falling back to Gemini 2.5 Flash...")
-            gemini_llm = get_llm("gemini", "gemini-2.5-flash", temperature=0.1)
-            raw_output = _invoke_chain(gemini_llm, prompt, "gemini")
+            logger.info("[generate_json_response] Falling back to Gemini 2.5 Flash Lite...")
+            fallback_llm = get_llm("gemini", "gemini-2.5-flash-lite", temperature=temperature)
+            raw_output = _invoke_chain(fallback_llm, prompt, "gemini")
             if raw_output:
                 cleaned = _extract_json(raw_output)
                 try:
-                    return json.loads(cleaned)
+                    data = json.loads(cleaned)
+                    if isinstance(data, dict):
+                        return data
                 except Exception:
-                    return parser.parse(cleaned)
+                    data = parser.parse(cleaned)
+                    if isinstance(data, dict):
+                        return data
         except Exception as e2:
-            logger.error(f"[generate_json_response] Gemini fallback failed: {e2}")
+            logger.error(f"[generate_json_response] Gemini lite fallback failed: {e2}")
 
     # Attempt 3: Safe structured fallback
     return {

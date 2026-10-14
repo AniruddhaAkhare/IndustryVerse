@@ -61,7 +61,6 @@ Generate a comprehensive 3D simulation JSON object matching this schema:
         result = generate_json_response(
             prompt,
             provider="gemini",
-            model="gemini-2.5-flash",
             temperature=0.1
         )
 

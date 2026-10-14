@@ -8,10 +8,12 @@ import os
 os.environ["ANONYMIZED_TELEMETRY"] = "False"
 os.environ["CHROMA_TELEMETRY"] = "False"
 
+import logging
+logging.getLogger("chromadb.telemetry.product.posthog").setLevel(logging.CRITICAL)
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-import logging
 from dotenv import load_dotenv
 
 # ── Load Environment Variables ─────────────────
@@ -19,6 +21,7 @@ load_dotenv()
 
 # ── Logging Setup ──────────────────────────────
 logging.basicConfig(level=logging.INFO)
+logging.getLogger("chromadb.telemetry.product.posthog").setLevel(logging.CRITICAL)
 logger = logging.getLogger("IndustryVerseAI")
 
 # ── Import Routers ─────────────────────────────

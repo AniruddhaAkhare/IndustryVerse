@@ -166,6 +166,16 @@ import logging
 import json
 from typing import List, Dict, Any
 
+# Suppress broken posthog telemetry logger in chromadb
+logging.getLogger("chromadb.telemetry.product.posthog").setLevel(logging.CRITICAL)
+logging.getLogger("chromadb").setLevel(logging.WARNING)
+
+try:
+    from chromadb.config import Settings
+    _chroma_settings = Settings(anonymized_telemetry=False)
+except Exception:
+    _chroma_settings = None
+
 try:
     from langchain_chroma import Chroma
 except ImportError:
@@ -199,11 +209,14 @@ def get_vectorstore(collection_name: str = "machine_logs"):
     if Chroma is None:
         return None
     try:
-        return Chroma(
-            collection_name=collection_name,
-            embedding_function=embeddings,
-            persist_directory=CHROMA_PERSIST_DIR,
-        )
+        chroma_kwargs = {
+            "collection_name": collection_name,
+            "embedding_function": embeddings,
+            "persist_directory": CHROMA_PERSIST_DIR,
+        }
+        if _chroma_settings is not None:
+            chroma_kwargs["client_settings"] = _chroma_settings
+        return Chroma(**chroma_kwargs)
     except Exception as e:
         logger.warning(f"Could not initialize Chroma vectorstore: {e}")
         return None

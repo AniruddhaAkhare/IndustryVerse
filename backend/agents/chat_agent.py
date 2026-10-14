@@ -42,7 +42,6 @@ Provide a helpful, detailed, technically accurate answer. Be specific to this ma
         response = generate_response( # Note: plain response, not JSON
             prompt,
             provider="gemini",
-            model="gemini-3.1-flash-lite-preview", # Super fast text generation
             temperature=0.4
         )
         return {
